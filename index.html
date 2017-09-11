@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>API_Examples</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            background-color: #1e1e1e;
+            margin: 0;
+            overflow: hidden;
+            font-family: Helvetica;
+
+        }
+    </style>
+
+</head>
+<body>
+
+<script src="visualizer.min.js"></script>
+
+
+<script>
+
+	//add new visualizer to this page
+    var app = new visiualizer();
+	//start the app
+	app.run();
+
+
+	//defult api call parameters
+	var apiCalls = [
+
+        {
+            name: 'surfaceLattice_ball',
+
+            node:'surfaceLattice',
+
+            parameters:{
+
+                componentA: '05e7c0e3a195b75f0ced56f355ce1aa2',
+                componentB: '6171a57ead7b8361f02cce80816d293d',
+                scaffoldMesh1: '9ba748df8cbdee653a195edbe9b1ea05',
+				cellHeight: 3,
+				directOutput: 'true'
+
+			}
+			
+		},
+		
+		{
+            name: 'surfaceLattice_donat',
+
+            node:'surfaceLattice',
+
+            parameters:{
+
+                componentA: '05e7c0e3a195b75f0ced56f355ce1aa2',
+                componentB: '6171a57ead7b8361f02cce80816d293d',
+                scaffoldMesh1: 'd516410fec4ed9d9b6cc2305e7375d81',
+				cellHeight: 3,
+				directOutput: 'true'
+
+			}
+			
+		},
+		
+		{
+            name: 'surfaceLattice_flat',
+
+            node:'surfaceLattice',
+
+            parameters:{
+
+                componentA: '05e7c0e3a195b75f0ced56f355ce1aa2',
+                componentB: '6171a57ead7b8361f02cce80816d293d',
+                scaffoldMesh1: '30cfe6df7867737cddd0a8736ee42698',
+				cellHeight: 3,
+				directOutput: 'true'
+
+			}
+			
+        }
+
+    ];
+
+
+	// create gui for api calls
+    apiCalls.forEach(function (apiCall) {
+
+        var folder = app.gui.addFolder(apiCall.name);
+
+		folder.add(apiCall,'node');
+		
+		for(var key in apiCall.parameters){
+        	folder.add(apiCall.parameters,key);
+        }
+
+        folder.add({callAPI: function () {
+
+            makeAPICall(apiCall);
+
+		}},'callAPI');
+		
+		//folder.open();
+
+    });
+
+
+	function makeAPICall(params) {
+
+    
+        var apiCall = 'http://studiobitonti.appspot.com/'+params.node+'?';
+
+        // assemble parameters to api call URL
+        for(var key in params.parameters){
+
+            apiCall += key;
+            apiCall += '=';
+            apiCall += params.parameters[key];
+            apiCall += '&';
+
+        }
+
+        // show assembled URL
+        alert('Your api call is : ' + apiCall);
+
+        // use jQuery to make https get request
+        $.get(
+
+            apiCall,function (data) {
+
+				// the api result data contains processing time, obj string(if directOutput was chosen), and a temp URL for this obj file
+				console.log(data);
+
+				// load obj string into current scene
+				if(result.mesh) app.scene.remove(result.mesh);
+				result.mesh = app.loadOBJ(data.obj,true,true);
+
+				result.URL = data.ResultURL;
+
+
+			}
+			
+        ).fail(function(data) {
+
+			//show error message if failed
+            alert( 'ERROR:\n'+ data.responseText );
+
+        });
+
+
+	}
+	
+
+	//make a gui to show the result obj URL
+	var result = {mesh: null, URL: ''};
+	app.gui.add(result,'URL').listen();
+
+
+
+
+	
+
+
+</script>
+
+</body>
+</html>
